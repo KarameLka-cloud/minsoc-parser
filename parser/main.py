@@ -332,16 +332,27 @@ for _, row in df.iterrows():
 
 
 # ═══════════════════════════════════════════════════════════════
-#  6. УДАЛЕНИЕ ИСХОДНОГО EXCEL-ФАЙЛА
+#  6. ПЕРЕМЕЩЕНИЕ EXCEL-ФАЙЛА В ПАПКУ С ДАТОЙ
 # ═══════════════════════════════════════════════════════════════
 
-section("Очистка")
+section("Перемещение")
+
+# try:
+#     excel_path.unlink()
+#     log_ok(f"Удалён файл инструкций → {excel_filename}")
+# except OSError as e:
+#     log_warn(f"Не удалось удалить {excel_filename}: {e}")
 
 try:
-    excel_path.unlink()
-    log_ok(f"Удалён файл инструкций → {excel_filename}")
-except OSError as e:
-    log_warn(f"Не удалось удалить {excel_filename}: {e}")
+    # Если Excel-файл ещё не был перемещён (вдруг он совпадает с каким-то файлом из списка)
+    if excel_path.exists():
+        dest_excel = unique_path(date_dir, excel_filename)
+        shutil.move(str(excel_path), str(dest_excel))
+        log_ok(f"Excel-файл перемещён    → {date_str}/{excel_filename}")
+    else:
+        log_warn("Excel-файл уже был перемещён или не найден")
+except (shutil.Error, OSError) as e:
+    log_warn(f"Не удалось переместить Excel-файл: {e}")
 
 
 # ═══════════════════════════════════════════════════════════════
