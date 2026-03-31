@@ -8,6 +8,7 @@ import pandas as pd
 from utils.logs import log_ok, log_err, log_info, log_warn, section
 from utils.fix_filename_encoding import fix_filename_encoding
 from utils.unique_path import unique_path
+from utils.sanitize_folder_name import sanitize_folder_name
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -175,25 +176,26 @@ def main():
     log_ok(f"Папка для файлов       → {date_str}")
 
     # Читаем таблицу
-    try:
-        xls = pd.ExcelFile(excel_path)
-        sheet_name = xls.sheet_names[0]
-        df = pd.read_excel(xls, sheet_name=sheet_name,
-                           skiprows=EXCEL_SKIP_ROWS)
-    except FileNotFoundError:
-        log_err(f"Файл не найден: {excel_filename}")
-        sys.exit(1)
-    except Exception as e:
-        log_err(f"Ошибка чтения Excel: {e}")
-        sys.exit(1)
+    with pd.ExcelFile(excel_path) as xls:
+        try:
+            # xls = pd.ExcelFile(excel_path)
+            sheet_name = xls.sheet_names[0]
+            df = pd.read_excel(xls, sheet_name=sheet_name,
+                               skiprows=EXCEL_SKIP_ROWS)
+        except FileNotFoundError:
+            log_err(f"Файл не найден: {excel_filename}")
+            sys.exit(1)
+        except Exception as e:
+            log_err(f"Ошибка чтения Excel: {e}")
+            sys.exit(1)
 
-    required_cols = max(FOLDER_COL_INDEX, FILE_COL_INDEX) + 1
-    if df.shape[1] < required_cols:
-        log_err(
-            f"В таблице {df.shape[1]} столбцов, "
-            f"необходимо минимум {required_cols} (A–S)"
-        )
-        sys.exit(1)
+        required_cols = max(FOLDER_COL_INDEX, FILE_COL_INDEX) + 1
+        if df.shape[1] < required_cols:
+            log_err(
+                f"В таблице {df.shape[1]} столбцов, "
+                f"необходимо минимум {required_cols} (A–S)"
+            )
+            sys.exit(1)
 
     log_ok(
         f"Таблица загружена      → {df.shape[0]} строк, {df.shape[1]} столбцов")
@@ -214,11 +216,30 @@ def main():
         log_err("Не найдено ни одного непустого имени папки в столбце A")
         sys.exit(1)
 
+    # for folder in unique_folders:
+    #     try:
+    #         (date_dir / folder).mkdir(exist_ok=True)
+    #     except OSError as e:
+    #         log_warn(f"Не удалось создать папку '{folder}': {e}")
+
+    folder_mapping = {}
+
     for folder in unique_folders:
+        # Очищаем имя папки от запрещённых символов Windows
+        clean_folder_name = sanitize_folder_name(folder)
+
+        if clean_folder_name != folder:
+            log_info(f"Очищено имя папки     → {folder} → {clean_folder_name}")
+
+        folder_path = date_dir / clean_folder_name
+        folder_mapping[folder] = folder_path
+
         try:
-            (date_dir / folder).mkdir(exist_ok=True)
+            folder_path.mkdir(parents=True, exist_ok=True)
+            log_ok(f"Создана папка          → {clean_folder_name}")
         except OSError as e:
             log_warn(f"Не удалось создать папку '{folder}': {e}")
+            folder_mapping[folder] = None
 
     log_ok(f"Папок подготовлено     → {len(unique_folders)}")
 
@@ -255,7 +276,9 @@ def main():
             skipped += 1
             continue
 
-        target_folder = date_dir / folder_name
+        # target_folder = date_dir / folder_name
+        # Получаем путь к очищенной папке
+        target_folder = folder_mapping.get(folder_name)
 
         if not target_folder.exists():
             log_warn(
