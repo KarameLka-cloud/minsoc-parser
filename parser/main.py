@@ -5,24 +5,11 @@ import zipfile
 import shutil
 from pathlib import Path
 import pandas as pd
+from config import ZIP_DIR, EXTRACT_DIR, PROCESSED_DIR, FILES_DIR, EXCEL_SKIP_ROWS, FOLDER_COL_INDEX, FILE_COL_INDEX
 from utils.logs import log_ok, log_err, log_info, log_warn, section
 from utils.fix_filename_encoding import fix_filename_encoding
 from utils.unique_path import unique_path
 from utils.sanitize_folder_name import sanitize_folder_name
-
-
-# ═══════════════════════════════════════════════════════════════
-#  КОНФИГУРАЦИЯ
-# ═══════════════════════════════════════════════════════════════
-
-ZIP_DIR = "МИНСОЦ"
-EXTRACT_DIR = "Временные файлы"
-PROCESSED_DIR = "Обработанные архивы"
-FILES_DIR = "Файлы"
-
-EXCEL_SKIP_ROWS = 6
-FOLDER_COL_INDEX = 0
-FILE_COL_INDEX = 18
 
 
 # ═══════════════════════════════════════════════════════════════
