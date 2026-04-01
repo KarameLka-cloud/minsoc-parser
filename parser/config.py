@@ -1,12 +1,16 @@
+from dotenv import dotenv_values
+
+config = dotenv_values(".env")
+
 # ═══════════════════════════════════════════════════════════════
 #  КОНФИГУРАЦИЯ
 # ═══════════════════════════════════════════════════════════════
 
-ZIP_DIR = "500_ЦНМСП Ирк. обл  и путь) "
-EXTRACT_DIR = "Временные файлы"
-PROCESSED_DIR = "Обработанные архивы"
-FILES_DIR = "Файлы"
+ZIP_DIR = config.get("ZIP_DIR")
+EXTRACT_DIR = config.get("EXTRACT_DIR")
+PROCESSED_DIR = config.get("PROCESSED_DIR")
+FILES_DIR = config.get("FILES_DIR")
 
-EXCEL_SKIP_ROWS = 6
-FOLDER_COL_INDEX = 0
-FILE_COL_INDEX = 18
+EXCEL_SKIP_ROWS = int(config.get("EXCEL_SKIP_ROWS"))
+FOLDER_COL_INDEX = int(config.get("FOLDER_COL_INDEX"))
+FILE_COL_INDEX = int(config.get("FILE_COL_INDEX"))
