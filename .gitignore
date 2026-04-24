@@ -1,3 +1,6 @@
 /МИНСОЦ
 /parser/.venv
+/parser/__pycache__
+/parser/utils/__pycache__
 /parser/Временные файлы
+/500_ЦНМСП Ирк. обл  и путь/*
